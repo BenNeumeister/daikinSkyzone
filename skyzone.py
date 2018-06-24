@@ -11,12 +11,12 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import track_time_interval
 
 from homeassistant.const import (
-    CONF_HOST, CONF_ICON, CONF_MONITORED_CONDITIONS, CONF_NAME, CONF_SCAN_INTERVAL
+    CONF_HOST, CONF_ICON, CONF_MONITORED_CONDITIONS, CONF_NAME, CONF_SCAN_INTERVAL, CONF_PASSWORD
 )
     
 from homeassistant.helpers.discovery import load_platform  
 
-REQUIREMENTS = ['daikinPyZone==0.2']
+REQUIREMENTS = ['daikinPyZone==0.3']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,6 +28,7 @@ CONF_DEFAULTNAME = 'Daikin Skyzone'
 CONF_DEFAULTHOST = '0.0.0.0'
 CONF_DEBUGLEVEL = 'debuglevel'
 CONF_POLLEXTERNALSENS = 'pollextsensors'
+CONF_DEFAULTPASSWORD = '0000'
 DEFAULT_DEBUGLEVEL = 0
 RETRY_LIMIT = 5
 
@@ -42,6 +43,7 @@ CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Optional(CONF_HOST, default=CONF_DEFAULTHOST): cv.string,
         vol.Optional(CONF_NAME, default=CONF_DEFAULTNAME): cv.string,
+        vol.Optional(CONF_PASSWORD, default=CONF_DEFAULTPASSWORD): cv.string,
         vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
         vol.Optional(CONF_DEBUGLEVEL, default=DEFAULT_DEBUGLEVEL): cv.positive_int,
         vol.Optional(CONF_POLLEXTERNALSENS, default=DEFAULT_DEBUGLEVEL): cv.positive_int
@@ -56,8 +58,9 @@ def setup(hass,  config):
     ipAddress = config[DOMAIN][CONF_HOST]
     debugLvl = config[DOMAIN][CONF_DEBUGLEVEL]
     pollExtSns = config[DOMAIN][CONF_POLLEXTERNALSENS]
+    password = config[DOMAIN][CONF_PASSWORD]
         
-    skyzoneAPI = skyZone_setup(hass,name, ipAddress, debugLvl, pollExtSns)
+    skyzoneAPI = skyZone_setup(hass, password, name, ipAddress, debugLvl, pollExtSns)
     
     if skyzoneAPI is None:
         return False
@@ -88,9 +91,9 @@ def setup(hass,  config):
     return True
 
 
-def skyZone_setup(hass,name, ipAddress, debugLvl, pollExtSns):
+def skyZone_setup(hass,password, name, ipAddress, debugLvl, pollExtSns):
     from daikinPyZone import DaikinSkyZone      
-    daikinSkyzone = hass.data[DAIKIN_SKYZONE] =  DaikinSkyZone(name, ipAddress, debugLvl, pollExtSns)
+    daikinSkyzone = hass.data[DAIKIN_SKYZONE] =  DaikinSkyZone(password, name, ipAddress, debugLvl, pollExtSns)
 
     retryCount = 0   
     while(retryCount < RETRY_LIMIT):
