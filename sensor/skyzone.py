@@ -22,11 +22,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     
     if(daikinSkyzone.IsUnitConnected()):              
         #loop over enabled sensors
-        #1,2 and 3 are default enabled sensors (Internal, Outdoor and Coolant)
-        #External  sensors can be from 0 to 2 depending on hardware connected to AC.
+        #0, 3 and 4 are default enabled sensors (Internal, Outdoor and Refrigerant)
+        #External  sensors (#1/#2) can be from 0 to 2 depending on hardware connected to AC.
+        sensors.append(DaikinClimateSensor(daikinSkyzone, 0 , units))   #Internal
+        sensors.append(DaikinClimateSensor(daikinSkyzone, 3 , units))   #External
+        sensors.append(DaikinClimateSensor(daikinSkyzone, 4 , units))   #Refrigerant
 
-        for x in range (3 + daikinSkyzone.GetNumberExternalSensors()):
-            sensors.append(DaikinClimateSensor(daikinSkyzone, x , units))
+        for x in range (daikinSkyzone.GetNumberExternalSensors()):
+            sensors.append(DaikinClimateSensor(daikinSkyzone, (x+1) , units))
 
         add_devices(sensors, True)
 
