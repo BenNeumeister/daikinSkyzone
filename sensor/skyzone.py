@@ -15,18 +15,19 @@ from custom_components.skyzone import (
     DAIKIN_SKYZONE, CONF_SENSOR_ICON)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
-   #pull skyzone from base component
+    #pull skyzone from base component
     daikinSkyzone = hass.data[DAIKIN_SKYZONE]
     units = hass.config.units
     sensors = []
     
     if(daikinSkyzone.IsUnitConnected()):              
         #loop over enabled sensors
-        #0, 3 and 4 are default enabled sensors (Internal, Outdoor and Refrigerant)
+        #Default enabled sensors (Internal, Outdoor and Refrigerant)
         #External  sensors (#1/#2) can be from 0 to 2 depending on hardware connected to AC.
-        sensors.append(DaikinClimateSensor(daikinSkyzone, 0 , units))   #Internal
-        sensors.append(DaikinClimateSensor(daikinSkyzone, 3 , units))   #External
-        sensors.append(DaikinClimateSensor(daikinSkyzone, 4 , units))   #Refrigerant
+        from daikinPyZone.daikinClasses import (SensorIndex)
+        sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Internal, units))     #Internal
+        sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Outdoor, units))      #Outdoor
+        sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Refrigerant, units))  #Refrigerant
 
         for x in range (daikinSkyzone.GetNumberExternalSensors()):
             sensors.append(DaikinClimateSensor(daikinSkyzone, (x+1) , units))
@@ -50,7 +51,7 @@ class DaikinClimateSensor(Entity):
 
     @property
     def icon(self):
-        """Icon to use in the frontend,."""
+        """Icon to use in the frontend."""
         return self._icon
 
     @property

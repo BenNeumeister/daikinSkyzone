@@ -19,18 +19,15 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     switches = []
     
     if(daikinSkyZone.IsUnitConnected()):              
-        #loop over enabled sensors
-        #1,2 and 3 are default enabled sensors (Internal, Outdoor and Coolant)
-        #External  sensors can be from 0 to 2 depending on hardware connected to AC.
-
+        #loop over supported zones
         for x in range (daikinSkyZone.GetNumberOfZones()):
             switches.append(DaikinClimateZoneSwtich(daikinSkyZone, x ))
             
         #If no external sensors are present, no need to add temp sensor selection options
         if(daikinSkyZone.GetNumberExternalSensors() > 0):
-            switches.append(DaikinClimateTempSwtich(daikinSkyZone, 0 ))
+            switches.append(DaikinClimateTempSwtich(daikinSkyZone, 0 )) #Internal
             for x in range (daikinSkyZone.GetNumberExternalSensors()):
-                switches.append(DaikinClimateTempSwtich(daikinSkyZone, (x+1) ))
+                switches.append(DaikinClimateTempSwtich(daikinSkyZone, (x+1) )) #External 1/2
 
         add_devices(switches, True)
 

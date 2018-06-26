@@ -16,7 +16,7 @@ from homeassistant.const import (
     
 from homeassistant.helpers.discovery import load_platform  
 
-REQUIREMENTS = ['daikinPyZone==0.3']
+REQUIREMENTS = ['daikinPyZone==0.4']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def setup(hass,  config):
             hass.data[DAIKIN_SKYZONE].ExternalTempSensorUpdate()
         
     # Call the API to refresh updates
-    # Split into seperate processes to keep update time under 10s.
+    # Split into seperate processes to attempt to keep update time under 10s.
     track_time_interval(hass,BasicUpdate, scanInterval)
     track_time_interval(hass,TempSensorSkyzone, scanInterval)
     track_time_interval(hass,ExternalTempSensorSkyzone, (scanInterval*3))
