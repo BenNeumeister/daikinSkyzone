@@ -16,13 +16,13 @@ from homeassistant.const import (
     
 from homeassistant.helpers.discovery import load_platform  
 
-REQUIREMENTS = ['daikinPyZone==0.4']
+REQUIREMENTS = ['daikinPyZone==0.5']
 
 _LOGGER = logging.getLogger(__name__)
 
 DAIKIN_SKYZONE = 'skyzone_climate'
 DOMAIN = 'skyzone'
-SCAN_INTERVAL = timedelta(seconds=60)
+SCAN_INTERVAL = timedelta(seconds=30)
 
 CONF_DEFAULTNAME = 'Daikin Skyzone'
 CONF_DEFAULTHOST = '0.0.0.0'
