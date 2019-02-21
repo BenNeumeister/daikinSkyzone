@@ -16,8 +16,7 @@ from homeassistant.components.climate import (
     PLATFORM_SCHEMA, SUPPORT_FAN_MODE, SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE,
     ClimateDevice)    
 
-from custom_components.skyzone import (
-    DAIKIN_SKYZONE)
+from . import DAIKIN_SKYZONE
 
 ATTR_NUM_OF_ZONES = 'number_of_zones'
 ATTR_NUM_OF_EXT_SENSORS = 'number_of_external_sensors'

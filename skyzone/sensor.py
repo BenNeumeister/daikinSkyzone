@@ -11,8 +11,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util.unit_system import UnitSystem
 
-from custom_components.skyzone import (
-    DAIKIN_SKYZONE, CONF_SENSOR_ICON)
+from . import (DAIKIN_SKYZONE, CONF_SENSOR_ICON)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     #pull skyzone from base component

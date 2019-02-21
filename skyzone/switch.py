@@ -10,8 +10,7 @@ import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.switch import SwitchDevice
 
-from custom_components.skyzone import (
-    DAIKIN_SKYZONE, CONF_ZONESWITCH_ICON, CONF_TEMPSWITCH_ICON)
+from . import (DAIKIN_SKYZONE, CONF_ZONESWITCH_ICON, CONF_TEMPSWITCH_ICON)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
    #pull skyzone from base component

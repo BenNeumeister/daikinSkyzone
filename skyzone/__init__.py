@@ -14,7 +14,7 @@ from homeassistant.const import (
     CONF_HOST, CONF_ICON, CONF_MONITORED_CONDITIONS, CONF_NAME, CONF_SCAN_INTERVAL, CONF_PASSWORD
 )
     
-from homeassistant.helpers.discovery import load_platform  
+from homeassistant.helpers.discovery import load_platform
 
 REQUIREMENTS = ['daikinPyZone==0.5']
 
