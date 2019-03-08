@@ -12,9 +12,8 @@ from homeassistant.const import (
     CONF_NAME, TEMP_CELSIUS, ATTR_TEMPERATURE
 )
 
-from homeassistant.components.climate import (
-    PLATFORM_SCHEMA, SUPPORT_FAN_MODE, SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE,
-    ClimateDevice)    
+from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
+from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE)    
 
 from . import DAIKIN_SKYZONE
 
