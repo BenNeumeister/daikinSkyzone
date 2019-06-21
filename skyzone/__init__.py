@@ -16,7 +16,7 @@ from homeassistant.const import (
     
 from homeassistant.helpers.discovery import load_platform
 
-REQUIREMENTS = ['daikinPyZone==0.5']
+REQUIREMENTS = ['daikinPyZone==0.6']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -81,18 +81,24 @@ def setup(hass,  config):
     def ExternalTempSensorSkyzone(event_time):
         if(pollExtSns == 1):
             hass.data[DAIKIN_SKYZONE].ExternalTempSensorUpdate()
+            
+    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. STock unit does 5min. 1 hour should be ok.
+    def ReSyncSkyzone(event_time):
+        hass.data[DAIKIN_SKYZONE].discover_skyzoneController()
         
     # Call the API to refresh updates
     # Split into seperate processes to attempt to keep update time under 10s.
     track_time_interval(hass,BasicUpdate, scanInterval)
     track_time_interval(hass,TempSensorSkyzone, scanInterval)
     track_time_interval(hass,ExternalTempSensorSkyzone, (scanInterval*3))
+    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. STock unit does 5min. 1 hour should be ok.
+    track_time_interval(hass,ReSyncSkyzone, timedelta(seconds=3600))
     
     return True
 
 
 def skyZone_setup(hass,password, name, ipAddress, debugLvl, pollExtSns):
-    from daikinPyZone import DaikinSkyZone      
+    from daikinPyZone import DaikinSkyZone
     daikinSkyzone = hass.data[DAIKIN_SKYZONE] =  DaikinSkyZone(password, name, ipAddress, debugLvl, pollExtSns)
 
     retryCount = 0   

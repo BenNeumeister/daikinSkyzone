@@ -103,7 +103,7 @@ class DaikinSkyZoneClimate(ClimateDevice):
         """Set new target temperature."""
         if kwargs.get(ATTR_TEMPERATURE) is not None:
             self._PiZone.SetTargetTemp(kwargs.get(ATTR_TEMPERATURE))
-        self._PiZone.SyncClimateSettingsData()
+            self._PiZone.SyncClimateSettingsData()
 
     def set_operation_mode(self, operation_mode):
         """Set new operation mode."""
