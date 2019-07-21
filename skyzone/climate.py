@@ -13,7 +13,9 @@ from homeassistant.const import (
 )
 
 from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
-from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_OPERATION_MODE, SUPPORT_TARGET_TEMPERATURE)    
+from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_TARGET_TEMPERATURE, 
+    CURRENT_HVAC_COOL, CURRENT_HVAC_HEAT, CURRENT_HVAC_IDLE, CURRENT_HVAC_OFF, 
+    HVAC_MODE_COOL, HVAC_MODE_HEAT, HVAC_MODE_OFF, HVAC_MODE_DRY, HVAC_MODE_FAN_ONLY)
 
 from . import DAIKIN_SKYZONE
 
@@ -25,7 +27,7 @@ ATTR_CLEAR_FILTER = 'clear_filter_warning'
 ATTR_INDOOR_UNIT = 'indoor_unit'
 ATTR_OUTDOOR_UNIT = 'outdoor_unit'
 
-SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE  | SUPPORT_OPERATION_MODE | SUPPORT_FAN_MODE )
+SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the SkyZone climate devices."""
@@ -76,25 +78,43 @@ class DaikinSkyZoneClimate(ClimateDevice):
         return 1
 
     @property
-    def current_operation(self):
+    def hvac_mode(self):
         """Return current operation ie. heat, cool, idle."""
         from daikinPyZone.daikinClasses import (OPERATION_MODES)
         return OPERATION_MODES[self._PiZone.GetCurrentMode()]
 
     @property
-    def operation_list(self):
+    def hvac_modes(self):
         """Return the list of available operation modes."""
         from daikinPyZone.daikinClasses import (OPERATION_MODES_MAP)
         return sorted(OPERATION_MODES_MAP.keys(), key=OPERATION_MODES_MAP.get)
 
     @property
-    def current_fan_mode(self):
+    def hvac_action(self):
+        """Return the current running hvac operation if supported.
+        Need to be one of CURRENT_HVAC_*.
+        """
+        from daikinPyZone.daikinClasses import (OPERATION_MODES)
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_OFF:
+            return CURRENT_HVAC_OFF
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_COOL:
+            return CURRENT_HVAC_COOL
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_HEAT:
+            return CURRENT_HVAC_HEAT
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_DRY:
+            return CURRENT_HVAC_DRY
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_FAN_ONLY:
+            return CURRENT_HVAC_FAN
+        return CURRENT_HVAC_IDLE
+
+    @property
+    def fan_mode(self):
         """Return the fan setting."""
         from daikinPyZone.daikinClasses import (FAN_MODES)
         return FAN_MODES[self._PiZone.GetFanSpeed()]
 
     @property
-    def fan_list(self):
+    def fan_modes(self):
         """Return the list of available fan modes."""
         from daikinPyZone.daikinClasses import (FAN_MODE_MAP)
         return sorted(FAN_MODE_MAP.keys(), key=FAN_MODE_MAP.get)
@@ -105,7 +125,7 @@ class DaikinSkyZoneClimate(ClimateDevice):
             self._PiZone.SetTargetTemp(kwargs.get(ATTR_TEMPERATURE))
             self._PiZone.SyncClimateSettingsData()
 
-    def set_operation_mode(self, operation_mode):
+    def set_hvac_mode(self, operation_mode):
         """Set new operation mode."""
         from daikinPyZone.daikinClasses import (OPERATION_MODES_MAP)
         self._PiZone.SetCurrentMode(OPERATION_MODES_MAP[operation_mode])
