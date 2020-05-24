@@ -8,7 +8,7 @@ import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 
-from homeassistant.components.switch import SwitchDevice
+from homeassistant.components.switch import SwitchEntity
 
 from . import (DAIKIN_SKYZONE, CONF_ZONESWITCH_ICON, CONF_TEMPSWITCH_ICON)
 
@@ -35,7 +35,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         return False
         
 
-class DaikinClimateZoneSwtich(SwitchDevice):
+class DaikinClimateZoneSwtich(SwitchEntity):
     """Representation of a Switch - Zone."""
 
     def __init__(self, PiZone, zoneIndex):
@@ -74,7 +74,7 @@ class DaikinClimateZoneSwtich(SwitchDevice):
         self._PiZone.SetZoneInactive(self._zoneIndex)
         self._PiZone.SyncClimateSettingsData()
         
-class DaikinClimateTempSwtich(SwitchDevice):
+class DaikinClimateTempSwtich(SwitchEntity):
     """Representation of a Switch for the Sensor select."""
 
     def __init__(self, PiZone, sensorIndex):

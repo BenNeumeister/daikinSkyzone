@@ -12,7 +12,7 @@ from homeassistant.const import (
     CONF_NAME, TEMP_CELSIUS, ATTR_TEMPERATURE
 )
 
-from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
+from homeassistant.components.climate import ClimateEntity, PLATFORM_SCHEMA
 from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_TARGET_TEMPERATURE, 
     CURRENT_HVAC_COOL, CURRENT_HVAC_HEAT, CURRENT_HVAC_IDLE, CURRENT_HVAC_OFF, CURRENT_HVAC_DRY, CURRENT_HVAC_FAN, 
     HVAC_MODE_COOL, HVAC_MODE_HEAT, HVAC_MODE_OFF, HVAC_MODE_DRY, HVAC_MODE_FAN_ONLY)
@@ -43,7 +43,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         return False
         
 
-class DaikinSkyZoneClimate(ClimateDevice):
+class DaikinSkyZoneClimate(ClimateEntity):
     def __init__(self, PiZone):
         self._PiZone = PiZone
 
