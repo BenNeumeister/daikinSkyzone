@@ -148,7 +148,7 @@ class DaikinSkyZoneClimate(ClimateEntity):
         return self._PiZone.GetMaxSupportTemp()
         
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the optional device state attributes."""
         return {
             ATTR_INDOOR_UNIT: self._PiZone.GetIndoorUnitPartNumber(),
