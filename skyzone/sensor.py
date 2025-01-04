@@ -19,7 +19,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     units = hass.config.units
     sensors = []
     
-    if(daikinSkyzone.IsUnitConnected()):              
+    if(daikinSkyzone.is_unit_connected()):              
         #loop over enabled sensors
         #Default enabled sensors (Internal, Outdoor and Refrigerant)
         #External  sensors (#1/#2) can be from 0 to 2 depending on hardware connected to AC.
@@ -28,7 +28,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Outdoor, units))      #Outdoor
         sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Refrigerant, units))  #Refrigerant
 
-        for x in range (daikinSkyzone.GetNumberExternalSensors()):
+        for x in range (daikinSkyzone.get_number_of_external_sensors()):
             sensors.append(DaikinClimateSensor(daikinSkyzone, (x+1) , units))
 
         add_devices(sensors, True)
@@ -56,12 +56,12 @@ class DaikinClimateSensor(Entity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return self._PiZone.GetSensorName(self._sensorIndex)
+        return self._PiZone.get_sensor_name(self._sensorIndex)
 
     @property
     def state(self):
         """Return the value of the sensor."""
-        return self._PiZone.GetSensorValue(self._sensorIndex)
+        return self._PiZone.get_sensor_temperature(self._sensorIndex)
 
     @property
     def unit_of_measurement(self):

@@ -3,19 +3,26 @@ Support for Daikin Skyzone Climate.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/xxxxxxxxxxxxxxx/
 """
+from __future__ import annotations
+
 import logging
-import voluptuous as vol
+from typing import Any
 
-import homeassistant.helpers.config_validation as cv
-
-from homeassistant.const import (
-    CONF_NAME, TEMP_CELSIUS, ATTR_TEMPERATURE
+from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
+from homeassistant.components.climate import (
+    ATTR_PRESET_MODE,
+    PRESET_ACTIVITY,
+    PRESET_AWAY,
+    PRESET_COMFORT,
+    PRESET_ECO,
+    PRESET_HOME,
+    PRESET_NONE,
+    PRESET_SLEEP,
+    ClimateEntity,
+    ClimateEntityFeature,
+    HVACAction,
+    HVACMode,
 )
-
-from homeassistant.components.climate import ClimateEntity, PLATFORM_SCHEMA
-from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_TARGET_TEMPERATURE, 
-    CURRENT_HVAC_COOL, CURRENT_HVAC_HEAT, CURRENT_HVAC_IDLE, CURRENT_HVAC_OFF, CURRENT_HVAC_DRY, CURRENT_HVAC_FAN, 
-    HVAC_MODE_COOL, HVAC_MODE_HEAT, HVAC_MODE_OFF, HVAC_MODE_DRY, HVAC_MODE_FAN_ONLY)
 
 from . import DAIKIN_SKYZONE
 
@@ -27,14 +34,17 @@ ATTR_CLEAR_FILTER = 'clear_filter_warning'
 ATTR_INDOOR_UNIT = 'indoor_unit'
 ATTR_OUTDOOR_UNIT = 'outdoor_unit'
 
-SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE)
-
+SUPPORT_FLAGS = (ClimateEntityFeature.TURN_ON
+	| ClimateEntityFeature.TURN_OFF
+	| ClimateEntityFeature.TARGET_TEMPERATURE
+	| ClimateEntityFeature.FAN_MODE)
+        
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the SkyZone climate devices."""
     #pull skyzone from base component
     daikinSkyzone = hass.data[DAIKIN_SKYZONE]
 
-    if(daikinSkyzone.IsUnitConnected()):       
+    if(daikinSkyzone.is_unit_connected()):       
         #once initial data received, add device.
         add_devices([  DaikinSkyZoneClimate(daikinSkyzone)    ])
 
@@ -60,17 +70,17 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
-        return TEMP_CELSIUS
+        return UnitOfTemperature.CELSIUS
 
     @property
     def target_temperature(self):
         """Return the temperature we try to reach."""
-        return self._PiZone.GetTargetTemp()
+        return self._PiZone.get_target_temp()
 
     @property
     def current_temperature(self):
         """Return the current temperature."""
-        return self._PiZone.GetCurrentTempValue()
+        return self._PiZone.get_current_temp()
         
     @property
     def target_temperature_step(self):
@@ -80,8 +90,7 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def hvac_mode(self):
         """Return current operation ie. heat, cool, idle."""
-        from daikinPyZone.daikinClasses import (OPERATION_MODES)
-        return OPERATION_MODES[self._PiZone.GetCurrentMode()]
+        return OPERATION_MODES[self._PiZone.get_current_mode()]
 
     @property
     def hvac_modes(self):
@@ -92,26 +101,24 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def hvac_action(self):
         """Return the current running hvac operation if supported.
-        Need to be one of CURRENT_HVAC_*.
+        Need to be one of HVACAction*.
         """
-        from daikinPyZone.daikinClasses import (OPERATION_MODES)
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_OFF:
-            return CURRENT_HVAC_OFF
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_COOL:
-            return CURRENT_HVAC_COOL
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_HEAT:
-            return CURRENT_HVAC_HEAT
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_DRY:
-            return CURRENT_HVAC_DRY
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_FAN_ONLY:
-            return CURRENT_HVAC_FAN
-        return CURRENT_HVAC_IDLE
+        if OPERATION_MODES[self._PiZone.get_current_mode()] == HVACMode.OFF:
+            return HVACAction.OFF
+        if OPERATION_MODES[self._PiZone.get_current_mode()] == HVACMode.COOL:
+            return HVACAction.COOLING
+        if OPERATION_MODES[self._PiZone.get_current_mode()] == HVACMode.HEAT:
+            return HVACAction.HEATING
+        if OPERATION_MODES[self._PiZone.get_current_mode()] == HVACMode.DRY:
+            return HVACAction.DRYING
+        if OPERATION_MODES[self._PiZone.get_current_mode()] == HVACMode.FAN_ONLY:
+            return HVACAction.FAN
+        return HVACAction.IDLE
 
     @property
     def fan_mode(self):
         """Return the fan setting."""
-        from daikinPyZone.daikinClasses import (FAN_MODES)
-        return FAN_MODES[self._PiZone.GetFanSpeed()]
+        return FAN_MODES[self._PiZone.get_fan_speed()]
 
     @property
     def fan_modes(self):
@@ -122,40 +129,38 @@ class DaikinSkyZoneClimate(ClimateEntity):
     def set_temperature(self, **kwargs):
         """Set new target temperature."""
         if kwargs.get(ATTR_TEMPERATURE) is not None:
-            self._PiZone.SetTargetTemp(kwargs.get(ATTR_TEMPERATURE))
-            self._PiZone.SyncClimateSettingsData()
+            self._PiZone.set_target_temp(kwargs.get(ATTR_TEMPERATURE))
+            self._PiZone.sync_climate_request()
 
     def set_hvac_mode(self, operation_mode):
         """Set new operation mode."""
-        from daikinPyZone.daikinClasses import (OPERATION_MODES_MAP)
-        self._PiZone.SetCurrentMode(OPERATION_MODES_MAP[operation_mode])
-        self._PiZone.SyncClimateSettingsData()
+        self._PiZone.set_current_mode(OPERATION_MODES_MAP[operation_mode])
+        self._PiZone.sync_climate_request()
 
     def set_fan_mode(self, fan_mode):
         """Set new fan mode."""
-        from daikinPyZone.daikinClasses import (FAN_MODE_MAP)
-        self._PiZone.SetFanSpeed(FAN_MODE_MAP[fan_mode])
-        self._PiZone.SyncClimateSettingsData()
+        self._PiZone.set_fan_speed(FAN_MODE_MAP[fan_mode])
+        self._PiZone.sync_climate_request()
         
     @property
     def min_temp(self):
         """Return the minimum temperature."""
-        return self._PiZone.GetMinSupportTemp()
+        return self._PiZone.get_min_supported_temp()
 
     @property
     def max_temp(self):
         """Return the maximum temperature."""
-        return self._PiZone.GetMaxSupportTemp()
+        return self._PiZone.get_max_supported_temp()
         
     @property
     def extra_state_attributes(self):
         """Return the optional device state attributes."""
         return {
-            ATTR_INDOOR_UNIT: self._PiZone.GetIndoorUnitPartNumber(),
-            ATTR_OUTDOOR_UNIT: self._PiZone.GetOutdoorUnitPartNumber(),
-            ATTR_NUM_OF_ZONES: self._PiZone.GetNumberOfZones(),
-            ATTR_NUM_OF_EXT_SENSORS: self._PiZone.GetNumberExternalSensors(),
-            ATTR_ERROR_CODES: self._PiZone.GetErrorCodes(),
-            ATTR_HISTORY_ERROR_CODES: self._PiZone.GetHistoryErrorCodes(),
-            ATTR_CLEAR_FILTER: self._PiZone.GetClearFilterFlag()
+            ATTR_INDOOR_UNIT: self._PiZone.get_indoor_unit_part_number(),
+            ATTR_OUTDOOR_UNIT: self._PiZone.get_outdoor_unit_part_number(),
+            ATTR_NUM_OF_ZONES: self._PiZone.get_number_of_zones(),
+            ATTR_NUM_OF_EXT_SENSORS: self._PiZone.get_number_of_external_sensors(),
+            ATTR_ERROR_CODES: self._PiZone.get_error_codes(),
+            ATTR_HISTORY_ERROR_CODES: self._PiZone.get_history_error_codes(),
+            ATTR_CLEAR_FILTER: self._PiZone.get_clear_filter_flag()
         }

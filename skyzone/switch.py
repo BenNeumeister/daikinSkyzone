@@ -17,15 +17,15 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     daikinSkyZone = hass.data[DAIKIN_SKYZONE]
     switches = []
     
-    if(daikinSkyZone.IsUnitConnected()):              
+    if(daikinSkyZone.is_unit_connected()):              
         #loop over supported zones
-        for x in range (daikinSkyZone.GetNumberOfZones()):
+        for x in range (daikinSkyZone.get_number_of_zones()):
             switches.append(DaikinClimateZoneSwtich(daikinSkyZone, x ))
             
         #If no external sensors are present, no need to add temp sensor selection options
-        if(daikinSkyZone.GetNumberExternalSensors() > 0):
+        if(daikinSkyZone.get_number_of_external_sensors() > 0):
             switches.append(DaikinClimateTempSwtich(daikinSkyZone, 0 )) #Internal
-            for x in range (daikinSkyZone.GetNumberExternalSensors()):
+            for x in range (daikinSkyZone.get_number_of_external_sensors()):
                 switches.append(DaikinClimateTempSwtich(daikinSkyZone, (x+1) )) #External 1/2
 
         add_devices(switches, True)
@@ -52,12 +52,12 @@ class DaikinClimateZoneSwtich(SwitchEntity):
     @property
     def name(self):
         """Return the name of the zone."""
-        return self._PiZone.GetZoneName(self._zoneIndex)
+        return self._PiZone.get_zone_name(self._zoneIndex)
         
     @property
     def is_on(self):
         """Call GetSensorState function."""
-        return self._PiZone.GetZonesState(self._zoneIndex)
+        return self._PiZone.get_zone_state(self._zoneIndex)
             
     @property
     def available(self):
@@ -66,13 +66,13 @@ class DaikinClimateZoneSwtich(SwitchEntity):
 
     def turn_on(self, **kwargs):
         """Turn the zone on."""
-        self._PiZone.SetZoneActive(self._zoneIndex)
-        self._PiZone.SyncClimateSettingsData()
+        self._PiZone.set_zone_active(self._zoneIndex)
+        self._PiZone.sync_climate_request()
 
     def turn_off(self, **kwargs):
         """Turn the zone off."""
-        self._PiZone.SetZoneInactive(self._zoneIndex)
-        self._PiZone.SyncClimateSettingsData()
+        self._PiZone.set_zone_inactive(self._zoneIndex)
+        self._PiZone.sync_climate_request()
         
 class DaikinClimateTempSwtich(SwitchEntity):
     """Representation of a Switch for the Sensor select."""
@@ -91,12 +91,12 @@ class DaikinClimateTempSwtich(SwitchEntity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return self._PiZone.GetSensorName(self._sensorIndex)
+        return self._PiZone.get_sensor_name(self._sensorIndex)
         
     @property
     def is_on(self):
         """Call GetSensorState function."""
-        return self._PiZone.GetSensorState(self._sensorIndex)
+        return self._PiZone.get_sensor_state(self._sensorIndex)
             
     @property
     def available(self):
@@ -105,8 +105,8 @@ class DaikinClimateTempSwtich(SwitchEntity):
 
     def turn_on(self, **kwargs):
         """Turn the switch on, select the current sensor index."""
-        self._PiZone.SetSelectedTempSensor(self._sensorIndex)
-        self._PiZone.SyncClimateSensor()
+        self._PiZone.set_selected_temp_sensor(self._sensorIndex)
+        self._PiZone.update_temperate_sensor()
         
     def turn_off(self, **kwargs):
         """Not allowed to turn on. Turning on another sensor will turn on the other."""

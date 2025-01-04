@@ -16,7 +16,7 @@ from homeassistant.const import (
     
 from homeassistant.helpers.discovery import load_platform
 
-REQUIREMENTS = ['daikinPyZone==0.6']
+REQUIREMENTS = ['daikinPyZone==1.0']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,25 +73,24 @@ def setup(hass,  config):
  
     #handle update triggers
     def BasicUpdate(event_time):
-        hass.data[DAIKIN_SKYZONE].BasicUpdate()
+        hass.data[DAIKIN_SKYZONE].update()
         
     def TempSensorSkyzone(event_time):
-        hass.data[DAIKIN_SKYZONE].TempSensorUpdate()
+        hass.data[DAIKIN_SKYZONE].update_temperate_sensor()
         
     def ExternalTempSensorSkyzone(event_time):
-        if(pollExtSns == 1):
-            hass.data[DAIKIN_SKYZONE].ExternalTempSensorUpdate()
-            
-    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. STock unit does 5min. 1 hour should be ok.
+        hass.data[DAIKIN_SKYZONE].update_additional_temperature_sensors()
+        
+    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. Stock unit does 5min. 1 hour should be ok.
     def ReSyncSkyzone(event_time):
-        hass.data[DAIKIN_SKYZONE].discover_skyzoneController()
+        hass.data[DAIKIN_SKYZONE].discover_skyzone_controller()
         
     # Call the API to refresh updates
     # Split into seperate processes to attempt to keep update time under 10s.
     track_time_interval(hass,BasicUpdate, scanInterval)
     track_time_interval(hass,TempSensorSkyzone, scanInterval)
     track_time_interval(hass,ExternalTempSensorSkyzone, (scanInterval*3))
-    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. STock unit does 5min. 1 hour should be ok.
+    #Skyzone controller sometimes drops connected IP, so requires a resync once in a while. Stock unit does 5min. 1 hour should be ok.
     track_time_interval(hass,ReSyncSkyzone, timedelta(seconds=3600))
     
     return True
@@ -103,13 +102,14 @@ def skyZone_setup(hass,password, name, ipAddress, debugLvl, pollExtSns):
 
     retryCount = 0   
     while(retryCount < RETRY_LIMIT):
-        if (daikinSkyzone.discover_skyzoneController() == 0):
+        if (daikinSkyzone.discover_skyzone_controller() == 0):
             _LOGGER.info("Retrying discovery of SkyZone unit.")
             retryCount +=1
         else:
             break 
 
-    if(daikinSkyzone.IsUnitConnected()):       
+    if(daikinSkyzone.is_unit_connected()):
         return daikinSkyzone
     else:
         return None
+
