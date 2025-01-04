@@ -9,13 +9,9 @@ import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.const import (
-    CONF_NAME, TEMP_CELSIUS, ATTR_TEMPERATURE
+    CONF_NAME, UnitOfTemperature, ATTR_TEMPERATURE
 )
-
-from homeassistant.components.climate import ClimateEntity, PLATFORM_SCHEMA
-from homeassistant.components.climate.const import (SUPPORT_FAN_MODE, SUPPORT_TARGET_TEMPERATURE, 
-    CURRENT_HVAC_COOL, CURRENT_HVAC_HEAT, CURRENT_HVAC_IDLE, CURRENT_HVAC_OFF, CURRENT_HVAC_DRY, CURRENT_HVAC_FAN, 
-    HVAC_MODE_COOL, HVAC_MODE_HEAT, HVAC_MODE_OFF, HVAC_MODE_DRY, HVAC_MODE_FAN_ONLY)
+from homeassistant.components.climate import( ClimateEntity, PLATFORM_SCHEMA, ClimateEntityFeature, HVACAction, HVACMode,)
 
 from . import DAIKIN_SKYZONE
 
@@ -27,7 +23,7 @@ ATTR_CLEAR_FILTER = 'clear_filter_warning'
 ATTR_INDOOR_UNIT = 'indoor_unit'
 ATTR_OUTDOOR_UNIT = 'outdoor_unit'
 
-SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE)
+SUPPORT_FLAGS = (ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.FAN_MODE | ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF )
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the SkyZone climate devices."""
@@ -60,7 +56,7 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
-        return TEMP_CELSIUS
+        return UnitOfTemperature.CELSIUS
 
     @property
     def target_temperature(self):
@@ -95,17 +91,17 @@ class DaikinSkyZoneClimate(ClimateEntity):
         Need to be one of CURRENT_HVAC_*.
         """
         from daikinPyZone.daikinClasses import (OPERATION_MODES)
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_OFF:
-            return CURRENT_HVAC_OFF
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_COOL:
-            return CURRENT_HVAC_COOL
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_HEAT:
-            return CURRENT_HVAC_HEAT
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_DRY:
-            return CURRENT_HVAC_DRY
-        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVAC_MODE_FAN_ONLY:
-            return CURRENT_HVAC_FAN
-        return CURRENT_HVAC_IDLE
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVACMode.OFF:
+            return HVACAction.OFF
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVACMode.COOL:
+            return HVACAction.COOLING
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVACMode.HEAT:
+            return HVACAction.HEATING
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVACMode.DRY:
+            return HVACAction.DRYING
+        if OPERATION_MODES[self._PiZone.GetCurrentMode()] == HVACMode.FAN_ONLY:
+            return HVACAction.FAN
+        return HVACAction.IDLE
 
     @property
     def fan_mode(self):
