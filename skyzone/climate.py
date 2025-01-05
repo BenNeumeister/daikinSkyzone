@@ -25,6 +25,12 @@ from homeassistant.components.climate import (
 )
 
 from . import DAIKIN_SKYZONE
+from daikinPyZone.daikinClasses import (
+    OPERATION_MODES, 
+    OPERATION_MODES_MAP, 
+    FAN_MODE_MAP,
+    FAN_MODES,
+)
 
 ATTR_NUM_OF_ZONES = 'number_of_zones'
 ATTR_NUM_OF_EXT_SENSORS = 'number_of_external_sensors'
@@ -95,7 +101,6 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def hvac_modes(self):
         """Return the list of available operation modes."""
-        from daikinPyZone.daikinClasses import (OPERATION_MODES_MAP)
         return sorted(OPERATION_MODES_MAP.keys(), key=OPERATION_MODES_MAP.get)
 
     @property
@@ -123,7 +128,6 @@ class DaikinSkyZoneClimate(ClimateEntity):
     @property
     def fan_modes(self):
         """Return the list of available fan modes."""
-        from daikinPyZone.daikinClasses import (FAN_MODE_MAP)
         return sorted(FAN_MODE_MAP.keys(), key=FAN_MODE_MAP.get)
      
     def set_temperature(self, **kwargs):

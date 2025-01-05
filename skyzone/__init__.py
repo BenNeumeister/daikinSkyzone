@@ -16,6 +16,8 @@ from homeassistant.const import (
     
 from homeassistant.helpers.discovery import load_platform
 
+from daikinPyZone import DaikinSkyZone
+
 REQUIREMENTS = ['daikinPyZone==1.0']
 
 _LOGGER = logging.getLogger(__name__)
@@ -97,7 +99,6 @@ def setup(hass,  config):
 
 
 def skyZone_setup(hass,password, name, ipAddress, debugLvl, pollExtSns):
-    from daikinPyZone import DaikinSkyZone
     daikinSkyzone = hass.data[DAIKIN_SKYZONE] =  DaikinSkyZone(password, name, ipAddress, debugLvl, pollExtSns)
 
     retryCount = 0   

@@ -12,6 +12,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util.unit_system import UnitSystem
 
 from . import (DAIKIN_SKYZONE, CONF_SENSOR_ICON)
+from daikinPyZone.daikinClasses import (SensorIndex)
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     #pull skyzone from base component
@@ -23,7 +24,6 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         #loop over enabled sensors
         #Default enabled sensors (Internal, Outdoor and Refrigerant)
         #External  sensors (#1/#2) can be from 0 to 2 depending on hardware connected to AC.
-        from daikinPyZone.daikinClasses import (SensorIndex)
         sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Internal, units))     #Internal
         sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Outdoor, units))      #Outdoor
         sensors.append(DaikinClimateSensor(daikinSkyzone, SensorIndex.Refrigerant, units))  #Refrigerant
