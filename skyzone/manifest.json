@@ -2,8 +2,8 @@
   "domain": "skyzone",
   "name": "Daikin Skyzone",
   "documentation": ["https://github.com/BenNeumeister/daikinSkyzone"],
-  "requirements": ["daikinPyZone==0.6"],
+  "requirements": ["daikinPyZone==1.0"],
   "dependencies": [],
-  "version": "2021.04.01",
+  "version": "2025.01.05",
   "codeowners": ["@BenNeumeister"]
 }
